@@ -36,6 +36,18 @@ def crawler(domain, ofile, mute):
             # get url's content
             print("Processing %s" % url)
             try:
+                response = requests.head(url)
+            except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidURL, requests.exceptions.InvalidSchema):
+                # add broken urls to it's own set, then continue
+                broken_urls.add(url)
+                continue
+
+            if 'content-type' in response.headers:
+                content_type = response.headers['content-type']
+                if not 'text/html' in content_type:
+                    continue
+
+            try:
                 response = requests.get(url)
             except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidURL, requests.exceptions.InvalidSchema):
                 # add broken urls to it's own set, then continue
